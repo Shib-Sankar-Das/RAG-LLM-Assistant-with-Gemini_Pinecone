@@ -27,10 +27,10 @@ class Sidebar:
             api_key = self._render_api_section()
             
             # Database Management section
-            db_type, namespace = self._render_database_section()
+            db_type, storage_mode = self._render_database_section()
             
             # Initialize RAG system
-            rag_system = self._initialize_rag_system(api_key, db_type, namespace)
+            rag_system = self._initialize_rag_system(api_key, db_type, storage_mode)
             
             # Database stats
             self._render_database_stats(rag_system)
@@ -39,7 +39,7 @@ class Sidebar:
             self._render_sources_list(rag_system)
             
             # Database actions
-            self._render_database_actions(rag_system, namespace)
+            self._render_database_actions(rag_system, storage_mode)
             
             return api_key, rag_system, db_type
     
@@ -67,12 +67,12 @@ class Sidebar:
             help="Choose storage mode. Persistent data survives sessions, Temporary data is cleared when session ends."
         )
         
-        # Set namespace based on selection
+        # Set storage mode based on selection
         if db_option == "Temporary (Session Only)":
-            namespace = "temp"
-            st.info("🚀 Using temporary Pinecone namespace - data will be cleared when session ends")
+            storage_mode = "temporary"
+            st.info("🚀 Using temporary Pinecone storage - data will be cleared when session ends")
         else:  # Persistent
-            namespace = None  # Default namespace
+            storage_mode = "permanent"
             st.info("💾 Using persistent Pinecone storage - data will be saved permanently")
         
         st.success("☁️ Using Pinecone cloud vector database")
@@ -81,20 +81,20 @@ class Sidebar:
             st.info("Please add your Pinecone API key to the .env file:")
             st.code("PINECONE_API_KEY=your_pinecone_api_key_here", language="bash")
         
-        return "pinecone", namespace
+        return "pinecone", storage_mode
     
-    def _initialize_rag_system(self, api_key: str, db_type: str, namespace: str) -> RAGSystem:
+    def _initialize_rag_system(self, api_key: str, db_type: str, storage_mode: str) -> RAGSystem:
         """Initialize or get RAG system instance."""
-        # Create a key that includes the namespace
-        db_key = f"pinecone_{namespace if namespace else 'default'}"
+        # Create a key that includes the storage mode
+        db_key = f"pinecone_{storage_mode}"
         
-        # Initialize RAG system if not exists or namespace changed
+        # Initialize RAG system if not exists or storage mode changed
         if 'rag_system' not in st.session_state or st.session_state.get('db_key') != db_key:
             st.session_state.rag_system = RAGSystem(api_key)
             st.session_state.db_key = db_key
             
             with st.spinner("Initializing Pinecone database..."):
-                if not st.session_state.rag_system.setup_vectorstore(namespace):
+                if not st.session_state.rag_system.setup_vectorstore(storage_mode=storage_mode):
                     st.stop()
         
         return st.session_state.rag_system
@@ -143,7 +143,7 @@ class Sidebar:
                     st.write(f"**Source:** {source['source']}")
                     st.write(f"**Added:** {format_datetime(source['added_at'])}")
     
-    def _render_database_actions(self, rag_system: RAGSystem, namespace: Optional[str] = None):
+    def _render_database_actions(self, rag_system: RAGSystem, storage_mode: str):
         """Render database action buttons."""
         st.markdown("---")
         st.markdown("### 🔧 Database Actions")
@@ -151,7 +151,7 @@ class Sidebar:
         col1, col2 = st.columns(2)
         with col1:
             if st.button("🗑️ Clear Database", type="secondary", use_container_width=True):
-                rag_system.clear_database(namespace)
+                rag_system.clear_database(storage_mode=storage_mode)
                 st.rerun()
         
         with col2:

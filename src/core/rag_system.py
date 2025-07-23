@@ -56,6 +56,8 @@ class RAGSystem:
         self.vectorstore = None
         self.qa_chain = None
         self.sources = []
+        self.current_namespace = None
+        self.session_id = None
         
         # Database type - always Pinecone
         self.db_type = "pinecone"
@@ -122,30 +124,77 @@ class RAGSystem:
         
         raise RuntimeError("Failed to initialize embeddings with any strategy")
     
-    def setup_vectorstore(self, namespace: Optional[str] = None):
-        """Initialize Pinecone vector store.
+    def _register_temp_session_cleanup(self, namespace: str):
+        """Register cleanup for temporary session namespace.
         
         Args:
-            namespace: Pinecone namespace for organization (None for default, "temp" for temporary)
+            namespace: Temporary namespace to clean up
+        """
+        # Store the temporary namespace in session state for cleanup
+        if 'temp_namespaces' not in st.session_state:
+            st.session_state.temp_namespaces = []
+        
+        if namespace not in st.session_state.temp_namespaces:
+            st.session_state.temp_namespaces.append(namespace)
+            
+        # Set up cleanup callback for when session ends
+        import atexit
+        atexit.register(self._cleanup_temp_namespace, namespace)
+    
+    def _cleanup_temp_namespace(self, namespace: str):
+        """Clean up temporary namespace when session ends.
+        
+        Args:
+            namespace: Temporary namespace to clean up
+        """
+        try:
+            if PINECONE_AVAILABLE and namespace.startswith("temp_session_"):
+                pc = Pinecone(api_key=self.config.PINECONE_API_KEY)
+                index = pc.Index(self.config.PINECONE_INDEX_NAME)
+                index.delete(delete_all=True, namespace=namespace)
+        except Exception:
+            # Silently fail - this is cleanup
+            pass
+    
+    def setup_vectorstore(self, storage_mode: str = "permanent"):
+        """Initialize Pinecone vector store with proper namespace handling.
+        
+        Args:
+            storage_mode: "permanent" for persistent storage, "temporary" for session-only storage
             
         Returns:
             True if successful, False otherwise
         """
         try:
+            # Determine namespace based on storage mode
+            if storage_mode == "temporary":
+                # Create unique session-based namespace for temporary storage
+                import uuid
+                if not self.session_id:
+                    self.session_id = str(uuid.uuid4())[:8]  # Short session ID
+                namespace = f"temp_session_{self.session_id}"
+                
+                # Register cleanup for temporary session
+                self._register_temp_session_cleanup(namespace)
+                
+            else:  # permanent mode
+                namespace = "persistent"
+            
+            self.current_namespace = namespace
             return self._setup_pinecone_vectorstore(namespace)
                 
         except Exception as e:
             st.error(f"Error setting up vectorstore: {str(e)}")
             return False
     
-    def _setup_pinecone_vectorstore(self, namespace: Optional[str] = None):
+    def _setup_pinecone_vectorstore(self, namespace: str):
         """Initialize Pinecone vector store.
         
         Args:
-            namespace: Pinecone namespace for organization (None for default, "temp" for temporary)
+            namespace: Pinecone namespace for organization
         """
         if not PINECONE_AVAILABLE:
-            st.error("Pinecone is not available. Please install: pip install pinecone-client langchain-pinecone")
+            st.error("Pinecone is not available. Please install: pip install pinecone[asyncio]==6.0.0 langchain-pinecone==0.2.11")
             return False
         
         try:
@@ -177,16 +226,19 @@ class RAGSystem:
                 with st.spinner("⏳ Waiting for index to be ready..."):
                     time.sleep(10)
             else:
-                if namespace == "temp":
-                    st.success(f"🚀 Connected to Pinecone index: {index_name} (temporary namespace)")
+                # Display appropriate message based on storage mode
+                if namespace.startswith("temp_session_"):
+                    st.success(f"🚀 Connected to Pinecone index: {index_name} (Temporary Session Storage)")
+                    st.info("💡 Data will be automatically cleared when session ends")
                 else:
-                    st.success(f"📂 Connected to existing Pinecone index: {index_name}")
+                    st.success(f"📂 Connected to Pinecone index: {index_name} (Permanent Storage)")
+                    st.info("💾 Data will be stored permanently")
             
             # Initialize vector store with namespace
             self.vectorstore = PineconeVectorStore(
                 index_name=index_name,
                 embedding=self.embeddings,
-                namespace=namespace or "default"
+                namespace=namespace
             )
             
             # Setup QA chain
@@ -294,30 +346,47 @@ class RAGSystem:
         except Exception as e:
             return {"error": f"Query error: {str(e)}"}
     
-    def clear_database(self, namespace: Optional[str] = None):
+    def clear_database(self, storage_mode: Optional[str] = None):
         """Clear the Pinecone vector database.
         
         Args:
-            namespace: Specific namespace to clear (None for all)
+            storage_mode: "temporary" to clear only temp sessions, "permanent" to clear persistent data, None for current namespace
         """
         try:
             if self.vectorstore and PINECONE_AVAILABLE:
                 pc = Pinecone(api_key=self.config.PINECONE_API_KEY)
                 index = pc.Index(self.config.PINECONE_INDEX_NAME)
                 
-                if namespace:
-                    # Clear specific namespace
-                    index.delete(delete_all=True, namespace=namespace)
-                    st.success(f"Pinecone namespace '{namespace}' cleared successfully")
+                if storage_mode == "temporary":
+                    # Clear all temporary session namespaces
+                    if 'temp_namespaces' in st.session_state:
+                        for temp_namespace in st.session_state.temp_namespaces:
+                            index.delete(delete_all=True, namespace=temp_namespace)
+                        st.session_state.temp_namespaces = []
+                        st.success("🧹 All temporary session data cleared")
+                elif storage_mode == "permanent":
+                    # Clear only persistent namespace
+                    index.delete(delete_all=True, namespace="persistent")
+                    st.success("🧹 Permanent storage data cleared")
+                elif self.current_namespace:
+                    # Clear current namespace only
+                    index.delete(delete_all=True, namespace=self.current_namespace)
+                    if self.current_namespace.startswith("temp_session_"):
+                        st.success("🧹 Current temporary session data cleared")
+                    else:
+                        st.success("🧹 Current database cleared")
                 else:
-                    # Clear all namespaces
+                    # Clear all data as fallback
                     index.delete(delete_all=True)
-                    st.success("Pinecone index cleared successfully")
+                    st.success("🧹 All database data cleared")
                 
-            self.vectorstore = None
-            self.qa_chain = None
-            self.sources = []
-            
+            # Reset system state
+            if storage_mode != "temporary" or (self.current_namespace and self.current_namespace.startswith("temp_session_")):
+                self.vectorstore = None
+                self.qa_chain = None
+                self.sources = []
+                self.current_namespace = None
+                
         except Exception as e:
             st.error(f"Error clearing database: {str(e)}")
     
