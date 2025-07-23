@@ -1,0 +1,143 @@
+# Git ignore file for RAG LLM Assistant
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ChromaDB (deprecated - keeping for safety)
+chroma_db/
+*.sqlite3
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# IDE/Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Operating System
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Windows
+*.tmp
+*.temp
+
+# Logs and temporary files
+*.log
+logs/
+temp/
+tmp/
+
+# Model cache and files
+.cache/
+models/
+*.model
+*.bin
+*.safetensors
+*.pkl
+
+# Test files (remove from repository)
+test_*.py
+*_test.py
+tests/
+
+# Development scripts
+start_dev.bat
+start_dev.sh
+dev_*.py
+
+# API Keys and secrets (additional protection)
+*.key
+*.pem
+*.crt
+secrets/
+credentials/
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Data files (if large datasets)
+data/
+datasets/
+*.csv
+*.xlsx
+*.parquet
+
+# Node.js (if any frontend dependencies)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Documentation build
+docs/build/
+site/
