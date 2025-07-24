@@ -1,0 +1,17 @@
+# Minimal requirements for deployment
+streamlit
+python-dotenv
+google-generativeai
+langchain
+langchain-community
+langchain-core
+langchain-text-splitters
+langchain-huggingface
+pinecone[asyncio]
+langchain-pinecone
+sentence-transformers
+torch
+PyPDF2
+requests
+beautifulsoup4
+lxml
