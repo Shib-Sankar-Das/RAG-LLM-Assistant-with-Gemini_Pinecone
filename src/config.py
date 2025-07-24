@@ -51,30 +51,10 @@ class Config:
     @classmethod
     def validate_config(cls):
         """Validate required configuration settings."""
-        missing_vars = []
-        
         if not cls.GEMINI_API_KEY:
-            missing_vars.append("GEMINI_API_KEY")
+            raise ValueError("GEMINI_API_KEY is required. Please set it in your .env file.")
         
         if not cls.PINECONE_API_KEY:
-            missing_vars.append("PINECONE_API_KEY")
-        
-        if missing_vars:
-            error_msg = f"Missing required environment variables: {', '.join(missing_vars)}\n\n"
-            
-            # Check if running on Streamlit Cloud
-            if os.getenv("STREAMLIT_SHARING_MODE") or "share.streamlit.io" in os.getenv("STREAMLIT_SERVER_ADDRESS", ""):
-                error_msg += "🌐 You're running on Streamlit Cloud. Please configure secrets:\n"
-                error_msg += "1. Go to your app dashboard\n"
-                error_msg += "2. Click 'Manage app' → 'Settings' → 'Secrets'\n"
-                error_msg += "3. Add your API keys in TOML format:\n"
-                error_msg += "   GEMINI_API_KEY = \"your_key_here\"\n"
-                error_msg += "   PINECONE_API_KEY = \"your_key_here\"\n"
-            else:
-                error_msg += "💻 For local development, add these to your .env file:\n"
-                for var in missing_vars:
-                    error_msg += f"   {var}=your_key_here\n"
-            
-            raise ValueError(error_msg)
+            raise ValueError("PINECONE_API_KEY is required. Please set it in your .env file.")
         
         return True
