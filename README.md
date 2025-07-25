@@ -1,6 +1,6 @@
-# RAG LLM Assistant with Enhanced Chat System
+# RAG LLM Assistant with Pinecone & Enhanced Security
 
-A sophisticated Retrieval-Augmented Generation (RAG) system built with Streamlit, LangChain, and Google Gemini 2.5 Pro. This application provides an intelligent document processing and chat interface with advanced features including conversation history, feedback integration, and context-aware responses.
+A sophisticated Retrieval-Augmented Generation (RAG) system built with Streamlit, LangChain, Google Gemini 2.5 Pro, and Pinecone vector database. This application provides an intelligent document processing and chat interface with advanced features including conversation history, feedback integration, temporary vs permanent storage modes, and enterprise-grade security.
 
 ## 🚀 Core Features
 
@@ -31,14 +31,23 @@ A sophisticated Retrieval-Augmented Generation (RAG) system built with Streamlit
 - **Streaming responses** for better user experience
 - **Multi-turn conversation** support
 
-### 🧠 **Intelligent Vector Database**
-- **Multiple database options**: Pinecone (cloud), ChromaDB (local)
+### 🧠 **Cloud-Native Vector Database**
+- **Pinecone cloud vector database** for production-ready deployment
+- **Automatic index management** with optimized settings
 - **HuggingFace embeddings** (sentence-transformers/all-MiniLM-L6-v2)
-- **Persistent storage** with automatic database management
+- **Namespace-based storage isolation** for session management
+- **Temporary vs Permanent storage modes** with automatic cleanup
 - **Metadata filtering** for precise document retrieval
-- **Similarity scoring** for relevance ranking
-- **Vector optimization** for memory efficiency
-- **Cloud-ready** deployment with Pinecone integration
+- **Similarity scoring** with relevance ranking
+- **Scalable cloud infrastructure** with global availability
+
+### 🔒 **Enterprise Security**
+- **Streamlit secrets management** for secure configuration
+- **API key protection** with comprehensive gitignore patterns
+- **Environment isolation** with template-based setup
+- **Security validation** and format checking
+- **No hardcoded credentials** - all secrets externalized
+- **Incident response procedures** documented
 
 ### 🔍 **Smart Search & Retrieval**
 - **Semantic search** beyond keyword matching
@@ -57,6 +66,14 @@ A sophisticated Retrieval-Augmented Generation (RAG) system built with Streamlit
 - **Thread management** with conversation branching
 - **Context window optimization** for token efficiency
 - **Memory management** with intelligent pruning
+
+### 🗄️ **Smart Storage Management**
+- **Temporary Storage Mode**: Session-based with automatic cleanup
+- **Permanent Storage Mode**: Persistent document storage
+- **Namespace isolation**: UUID-based session management
+- **Automatic cleanup**: Exit handlers for temporary sessions
+- **Resource optimization**: Efficient memory and storage usage
+- **Session persistence**: Maintain context across app restarts
 
 ### ⭐ **Advanced Feedback System**
 - **Multi-tier feedback** (👍 Positive, 👎 Negative, 📝 Detailed)
@@ -80,8 +97,8 @@ A sophisticated Retrieval-Augmented Generation (RAG) system built with Streamlit
 - **Real-time status updates** for all operations
 - **Progress indicators** for long-running tasks
 - **Error messages** with helpful suggestions
-- **Keyboard shortcuts** for power users
-- **Dark/light theme** support (coming soon)
+- **Storage mode selection** for user control
+- **Security-first design** with protected configurations
 
 ## 🛠️ Technical Architecture
 
@@ -89,20 +106,24 @@ A sophisticated Retrieval-Augmented Generation (RAG) system built with Streamlit
 - **Frontend**: Streamlit with custom CSS styling
 - **Backend**: LangChain framework for LLM orchestration
 - **LLM**: Google Gemini 2.5 Pro (latest model)
-- **Vector Database**: ChromaDB with persistent storage
+- **Vector Database**: Pinecone cloud vector database
 - **Embeddings**: HuggingFace sentence-transformers
 - **Document Processing**: PyPDF2, BeautifulSoup4
-- **Environment Management**: python-dotenv
+- **Configuration**: Streamlit secrets management
+- **Security**: Enterprise-grade secret protection
 
 ### **System Components**
 
-#### **1. RAG System (`src/core/rag_system.py`)**
+#### **1. Enhanced RAG System (`src/core/rag_system.py`)**
 ```python
 class RAGSystem:
     - Document ingestion and preprocessing
-    - Vector embedding generation and storage
+    - Pinecone vector embedding and storage
+    - Namespace-based session management
+    - Temporary vs permanent storage modes
     - Retrieval chain with source tracking
     - Query processing and response generation
+    - Automatic cleanup for temporary sessions
     - Context management and optimization
 ```
 
@@ -133,19 +154,29 @@ class ChatTab:
     - Response streaming and formatting
 ```
 
+#### **5. Secure Configuration (`src/config.py`)**
+```python
+class Config:
+    - Streamlit secrets integration
+    - Environment variable fallback
+    - API key validation and format checking
+    - Security-first configuration management
+```
+
 ### **Data Flow Architecture**
 1. **Document Ingestion** → Content extraction → Text chunking
-2. **Embedding Generation** → Vector storage in ChromaDB
+2. **Embedding Generation** → Vector storage in Pinecone cloud
 3. **Query Processing** → Similarity search → Context retrieval
 4. **Response Generation** → LLM processing → Source citation
 5. **Feedback Loop** → User feedback → System improvement
+6. **Session Management** → Namespace isolation → Automatic cleanup
 
 ## 📋 Setup Instructions
 
 ### 1. Clone the Repository
 ```bash
-git clone <your-repo-url>
-cd RAG-LLM-Assistant-with-Gemini
+git clone https://github.com/Shib-Sankar-Das/RAG-LLM-Assistant-with-Gemini_Pinecone.git
+cd RAG-LLM-Assistant-with-Gemini_Pinecone
 ```
 
 ### 2. Create Virtual Environment
@@ -161,38 +192,52 @@ source .venv/bin/activate  # On Mac/Linux
 pip install -r requirements.txt
 ```
 
-### 4. Set up Environment Variables
-1. Copy the example environment file:
+### 4. Set up Streamlit Secrets (Recommended)
+1. Create the secrets configuration:
    ```bash
-   copy .env.example .env  # On Windows
+   # Copy the template
+   cp .streamlit/secrets.toml.template .streamlit/secrets.toml  # Mac/Linux
    # or
-   cp .env.example .env    # On Mac/Linux
+   copy .streamlit\secrets.toml.template .streamlit\secrets.toml  # Windows
    ```
 
-2. Edit the `.env` file and configure your settings:
-   ```env
-   # Required: Google Gemini API Key
-   GEMINI_API_KEY=your_actual_api_key_here
+2. Edit `.streamlit/secrets.toml` and add your API keys:
+   ```toml
+   # Google Gemini API Configuration
+   GEMINI_API_KEY = "your_actual_gemini_api_key_here"
    
-   # Optional: Advanced Configuration
-   GEMINI_MODEL=gemini-2.5-pro
-   MAX_TOKENS=8192
-   TEMPERATURE=0.1
-   CHUNK_SIZE=1000
-   CHUNK_OVERLAP=200
+   # Pinecone Configuration
+   PINECONE_API_KEY = "your_actual_pinecone_api_key_here"
+   PINECONE_ENVIRONMENT = "gcp-starter"  # or your environment
+   PINECONE_INDEX_NAME = "rag-assistant"
    
-   # Enhanced Chat Features
-   CHAT_HISTORY_ENABLED=true
-   MAX_CHAT_HISTORY_CONTEXT=5
-   FEEDBACK_ENABLED=true
-   FEEDBACK_WEIGHT=0.3
+   # Model Configuration
+   MODEL_NAME = "gemini-2.5-pro"
    ```
 
-### 5. Get Your Gemini API Key
-1. Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
+### 5. Get Your API Keys
+
+#### **Google Gemini API Key:**
+1. Visit [Google AI Studio](https://aistudio.google.com/)
 2. Sign in with your Google account
-3. Create a new API key
-4. Copy the key and paste it into your `.env` file
+3. Navigate to "Get API Key"
+4. Create a new API key
+5. Copy the key to your `secrets.toml` file
+
+#### **Pinecone API Key:**
+1. Visit [Pinecone Console](https://app.pinecone.io/)
+2. Sign up for a free account
+3. Navigate to "API Keys" section
+4. Create a new API key
+5. Copy the key to your `secrets.toml` file
+
+#### **Create Pinecone Index:**
+1. In Pinecone Console, click "Create Index"
+2. Set these parameters:
+   - **Name**: `rag-assistant`
+   - **Dimensions**: `384` (for sentence-transformers/all-MiniLM-L6-v2)
+   - **Metric**: `cosine`
+   - **Environment**: `gcp-starter` (free tier)
 
 ### 6. Run the Application
 ```bash
@@ -201,9 +246,58 @@ streamlit run app.py
 
 The app will open in your browser at `http://localhost:8501`
 
+## 🔒 Security Setup
+
+### **Environment File Fallback (Optional)**
+For backward compatibility, you can also use `.env` files:
+
+1. Create a `.env` file:
+   ```bash
+   cp .env.example .env  # If available
+   ```
+
+2. Add your configuration:
+   ```env
+   GEMINI_API_KEY=your_actual_api_key_here
+   PINECONE_API_KEY=your_actual_pinecone_api_key_here
+   PINECONE_ENVIRONMENT=gcp-starter
+   PINECONE_INDEX_NAME=rag-assistant
+   MODEL_NAME=gemini-2.5-pro
+   ```
+
+### **Security Best Practices**
+- ✅ **Never commit** `secrets.toml` or `.env` files with real API keys
+- ✅ **Use the templates** for sharing setup instructions
+- ✅ **Regularly rotate** your API keys
+- ✅ **Monitor API usage** for suspicious activity
+- ✅ **Review** the [Security Checklist](SECURITY_CHECKLIST.md)
+
+For detailed security guidelines, see [SECURITY_CHECKLIST.md](SECURITY_CHECKLIST.md)
+
 ## 📱 Usage Guide
 
-### **🌐 Web Scraping Workflow**
+### **� Application Overview**
+1. **Start the application** with `streamlit run app.py`
+2. **Select storage mode** in the sidebar:
+   - **📁 Temporary**: Session-based storage with automatic cleanup
+   - **💾 Permanent**: Persistent storage across sessions
+3. **Navigate between tabs** using the sidebar menu
+4. **Monitor status** with real-time indicators
+
+### **🗄️ Storage Mode Selection**
+**Temporary Mode:**
+- Perfect for one-time document analysis
+- Automatically cleans up when session ends
+- UUID-based namespace isolation
+- Memory efficient for short-term use
+
+**Permanent Mode:**
+- Ideal for building a persistent knowledge base
+- Documents remain available across sessions
+- Cumulative document storage
+- Best for ongoing research and reference
+
+### **�🌐 Web Scraping Workflow**
 1. Navigate to the **"🌐 Web Scraping"** tab
 2. Enter the target website URL
 3. Configure scraping parameters:
@@ -263,116 +357,203 @@ The app will open in your browser at `http://localhost:8501`
 The project follows a modular architecture for maintainability and scalability:
 
 ```
-RAG-LLM-Assistant-with-Gemini/
-├── 📄 app.py                        # Main Streamlit application entry point
-├── 📋 requirements.txt              # Python dependencies and versions
-├── 📝 README.md                     # Comprehensive project documentation
-├── 🔧 .env                         # Environment variables (not in git)
-├── 📋 .env.example                 # Template for environment setup
-├── 🚫 .gitignore                   # Git ignore rules and patterns
-├── 📚 ENHANCED_CHAT_FEATURES.md    # Detailed chat system documentation
-├── 🔄 MODEL_UPDATE_SUMMARY.md      # LLM model upgrade information
-├── 🗃️ chroma_db/                   # Persistent vector database storage
-│   └── chroma.sqlite3              # ChromaDB database file
-└── 📁 src/                         # Modular source code organization
-    ├── ⚙️ config.py                # Centralized configuration management
-    ├── 📦 __init__.py              # Package initialization
-    ├── 🔧 core/                    # Core business logic and processing
-    │   ├── 📦 __init__.py          # Core package initialization
-    │   ├── 🧠 rag_system.py        # Main RAG system implementation
-    │   ├── 🤖 llm.py               # Gemini LLM wrapper and integration
-    │   └── 📄 document_processor.py # Document processing utilities
-    ├── 🎨 components/              # Streamlit UI components
-    │   ├── 📦 __init__.py          # Components package initialization
-    │   ├── 🧭 sidebar.py           # Navigation sidebar interface
-    │   ├── 🌐 web_scraping_tab.py  # Web scraping interface
-    │   ├── 📄 pdf_upload_tab.py    # PDF upload and processing tab
-    │   ├── 💬 chat_tab.py          # Enhanced chat interface
-    │   └── ❓ help_tab.py          # Help and documentation tab
-    └── 🛠️ utils/                   # Utility functions and helpers
-        ├── 📦 __init__.py          # Utils package initialization
-        └── 🎨 ui_helpers.py        # UI utility functions
+RAG-LLM-Assistant-with-Gemini_Pinecone/
+├── 📄 app.py                           # Main Streamlit application entry point
+├── 📋 requirements.txt                 # Python dependencies and versions
+├── 📝 README.md                        # Comprehensive project documentation
+├── � SECURITY_CHECKLIST.md            # Security guidelines and best practices
+├── � STREAMLIT_SECRETS_GUIDE.md       # Secrets configuration guide
+├── 🚫 .gitignore                       # Enhanced git ignore with security patterns
+├── � .streamlit/                      # Streamlit configuration directory
+│   ├── � secrets.toml                 # Secure configuration (not in git)
+│   └── 📋 secrets.toml.template        # Template for secure setup
+└── 📁 src/                             # Modular source code organization
+    ├── ⚙️ config.py                    # Secure configuration management
+    ├── 📦 __init__.py                  # Package initialization
+    ├── 🔧 core/                        # Core business logic and processing
+    │   ├── 📦 __init__.py              # Core package initialization
+    │   ├── 🧠 rag_system.py            # Enhanced RAG with Pinecone & storage modes
+    │   ├── 🤖 llm.py                   # Gemini LLM wrapper and integration
+    │   └── 📄 document_processor.py    # Document processing utilities
+    ├── 🎨 components/                  # Streamlit UI components
+    │   ├── 📦 __init__.py              # Components package initialization
+    │   ├── 🧭 sidebar.py               # Navigation with storage mode selection
+    │   ├── 🌐 web_scraping_tab.py      # Web scraping interface
+    │   ├── 📄 pdf_upload_tab.py        # PDF upload and processing tab
+    │   ├── 💬 chat_tab.py              # Enhanced chat interface
+    │   └── ❓ help_tab.py              # Help and documentation tab
+    └── 🛠️ utils/                       # Utility functions and helpers
+        ├── 📦 __init__.py              # Utils package initialization
+        └── 🎨 ui_helpers.py            # UI utility functions
 ```
 
 ### **📁 Directory Structure Details**
 
 #### **🔧 Core Components (`src/core/`)**
-- **`rag_system.py`**: Central RAG implementation with vector storage, retrieval chains, and source tracking
+- **`rag_system.py`**: Enhanced RAG with Pinecone cloud integration, namespace management, and storage modes
 - **`llm.py`**: Google Gemini 2.5 Pro integration with custom prompt engineering
 - **`document_processor.py`**: Multi-format document processing with content extraction and chunking
 
 #### **🎨 UI Components (`src/components/`)**
-- **`sidebar.py`**: Navigation interface with real-time status indicators
+- **`sidebar.py`**: Navigation interface with storage mode selection and status indicators
 - **`chat_tab.py`**: Enhanced chat interface with history and feedback systems
 - **`web_scraping_tab.py`**: Web content extraction with progress monitoring
 - **`pdf_upload_tab.py`**: Document upload interface with batch processing
 - **`help_tab.py`**: User guidance and system documentation
 
-#### **🛠️ Utilities (`src/utils/`)**
-- **`ui_helpers.py`**: Reusable UI components and styling functions
-- **`config.py`**: Environment management and configuration settings
+#### **🛠️ Configuration & Security (`src/`, `.streamlit/`)**
+- **`config.py`**: Secure configuration with Streamlit secrets and validation
+- **`secrets.toml`**: Secure API key storage (excluded from git)
+- **`secrets.toml.template`**: Safe template for setup instructions
 
-For detailed implementation information, see:
-- [ENHANCED_CHAT_FEATURES.md](ENHANCED_CHAT_FEATURES.md) - Chat system documentation
-- [MODEL_UPDATE_SUMMARY.md](MODEL_UPDATE_SUMMARY.md) - LLM upgrade details
+#### **📋 Documentation**
+- **`SECURITY_CHECKLIST.md`**: Comprehensive security guidelines
+- **`STREAMLIT_SECRETS_GUIDE.md`**: Configuration setup instructions
+
+### **🔐 Security Features**
+- ✅ **No hardcoded secrets** - All sensitive data externalized
+- ✅ **Enhanced .gitignore** - Comprehensive protection patterns
+- ✅ **Template-based setup** - Safe sharing of configuration instructions
+- ✅ **API key validation** - Format and length checking
+- ✅ **Security documentation** - Best practices and incident response
 
 ## 📊 Configuration Options
 
-The system provides extensive configuration options through environment variables:
+The system provides extensive configuration options through Streamlit secrets:
 
-### **🔧 Core LLM Settings**
-```env
+### **🔧 Core API Settings**
+```toml
 # Primary language model configuration
-GEMINI_MODEL=gemini-2.5-pro          # Latest Gemini model (upgraded)
-GEMINI_API_KEY=your_api_key_here     # Required: Your Google AI API key
-MAX_TOKENS=8192                      # Maximum response length
-TEMPERATURE=0.1                      # Response creativity (0-1)
-TOP_P=0.95                          # Nucleus sampling parameter
-TOP_K=40                            # Top-k sampling parameter
+GEMINI_API_KEY = "your_actual_gemini_api_key_here"  # Required: Google AI API key
+MODEL_NAME = "gemini-2.5-pro"                       # Latest Gemini model
+
+# Pinecone vector database configuration  
+PINECONE_API_KEY = "your_actual_pinecone_api_key_here"  # Required: Pinecone API key
+PINECONE_ENVIRONMENT = "gcp-starter"                    # Free tier environment
+PINECONE_INDEX_NAME = "rag-assistant"                   # Index name (must exist)
 ```
 
 ### **📚 Document Processing Settings**
-```env
+```toml
 # Text chunking and processing
-CHUNK_SIZE=1000                      # Text chunk size for vector storage
-CHUNK_OVERLAP=200                    # Overlap between chunks
-MAX_PAGES_PER_SCRAPE=10             # Maximum pages to scrape per session
-CONTENT_MIN_LENGTH=100              # Minimum content length for processing
-EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+CHUNK_SIZE = "1000"                      # Text chunk size for vector storage
+CHUNK_OVERLAP = "200"                    # Overlap between chunks
+EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"  # Embedding model
+EMBEDDING_DEVICE = "cpu"                 # Processing device (cpu/cuda)
 ```
 
-### **💬 Enhanced Chat Configuration**
-```env
+### **💬 Chat & Feedback Configuration**
+```toml
 # Conversation and feedback settings
-CHAT_HISTORY_ENABLED=true           # Enable conversation history
-MAX_CHAT_HISTORY_CONTEXT=5          # Number of previous messages to include
-FEEDBACK_ENABLED=true               # Enable user feedback system
-FEEDBACK_WEIGHT=0.3                 # Influence of feedback on responses (0-1)
-CONVERSATION_MEMORY_LIMIT=50        # Maximum stored conversation turns
-CONTEXT_WINDOW_SIZE=4000            # Maximum context tokens
+CHAT_HISTORY_ENABLED = "true"           # Enable conversation history
+MAX_CHAT_HISTORY_CONTEXT = "5"          # Number of previous messages to include
+FEEDBACK_ENABLED = "true"               # Enable user feedback system
+FEEDBACK_WEIGHT = "0.2"                 # Influence of feedback on responses (0-1)
 ```
 
-### **🗃️ Database and Storage Settings**
-```env
-# Vector database configuration
-CHROMA_DB_PATH=./chroma_db           # Database storage location
-SIMILARITY_THRESHOLD=0.7             # Minimum similarity for retrieval
-MAX_RETRIEVAL_DOCS=5                # Maximum documents per query
-VECTOR_DIMENSION=384                # Embedding vector dimension
-COLLECTION_NAME=documents           # ChromaDB collection name
+### **🌐 Web Scraping Settings**
+```toml
+# Web scraping configuration
+MAX_PAGES_DEFAULT = "3"                  # Default pages to scrape
+MAX_PAGES_LIMIT = "10"                   # Maximum pages allowed
+REQUEST_TIMEOUT = "10"                   # Request timeout in seconds
 ```
 
-### **🔍 Search and Retrieval Settings**
-```env
-# Search behavior configuration
-SEARCH_TYPE=similarity_score_threshold  # Search algorithm type
-RETURN_SOURCE_DOCUMENTS=true        # Include source citations
-RELEVANCE_SCORE_THRESHOLD=0.6       # Minimum relevance score
-MAX_CONTEXT_LENGTH=2000             # Maximum context per response
-ENABLE_METADATA_FILTERING=true      # Use document metadata in search
+### **�️ Storage & Retrieval Settings**
+```toml
+# Vector database and search configuration
+DATABASE_TYPE = "pinecone"               # Always use Pinecone for cloud deployment
+RETRIEVAL_K = "5"                        # Maximum documents per query
 ```
+
+### **🔒 Configuration Security**
+- **Streamlit Secrets**: Primary configuration method
+- **Environment Variables**: Fallback support for compatibility
+- **Template-based Setup**: Safe sharing without exposing secrets
+- **Validation**: Automatic format and length checking
+- **Error Guidance**: Clear instructions for configuration issues
+
+For detailed configuration setup, see [STREAMLIT_SECRETS_GUIDE.md](STREAMLIT_SECRETS_GUIDE.md)
+
+## 🚀 Deployment
+
+### **🌐 Streamlit Cloud Deployment**
+
+1. **Prepare Repository:**
+   ```bash
+   git add .
+   git commit -m "Ready for deployment"
+   git push origin main
+   ```
+
+2. **Deploy to Streamlit Cloud:**
+   - Visit [Streamlit Cloud](https://share.streamlit.io/)
+   - Connect your GitHub repository
+   - Select `app.py` as your main file
+   - Click "Deploy"
+
+3. **Configure Secrets:**
+   - Go to your app in Streamlit Cloud
+   - Navigate to **Settings** → **Secrets**
+   - Add your configuration in TOML format:
+   ```toml
+   GEMINI_API_KEY = "your_actual_gemini_api_key_here"
+   PINECONE_API_KEY = "your_actual_pinecone_api_key_here"
+   PINECONE_ENVIRONMENT = "gcp-starter"
+   PINECONE_INDEX_NAME = "rag-assistant"
+   MODEL_NAME = "gemini-2.5-pro"
+   ```
+
+4. **Verify Deployment:**
+   - Wait for automatic restart
+   - Test all functionality
+   - Monitor for any configuration errors
+
+### **🔧 Local Development**
+```bash
+# Start development server
+streamlit run app.py
+
+# Access at http://localhost:8501
+```
+
+### **🔒 Security Considerations**
+- ✅ All secrets managed through Streamlit Cloud secrets
+- ✅ No API keys exposed in repository
+- ✅ Enhanced gitignore for protection
+- ✅ Regular security audits recommended
+
+For detailed deployment instructions, see [STREAMLIT_SECRETS_GUIDE.md](STREAMLIT_SECRETS_GUIDE.md)
 
 ## 🧪 Advanced Features
+
+### **🗄️ Storage Mode Management**
+The application offers two distinct storage modes:
+
+**📁 Temporary Mode:**
+- Session-based storage with UUID namespaces
+- Automatic cleanup when session ends
+- Perfect for one-time document analysis
+- Memory efficient for short-term use
+- Ideal for testing and experimentation
+
+**💾 Permanent Mode:**
+- Persistent storage across sessions
+- Cumulative document knowledge base
+- Best for ongoing research projects
+- Shared knowledge repository
+- Long-term document retention
+
+### **🔄 Session Management**
+```python
+# Automatic session handling
+session_id = str(uuid.uuid4())
+namespace = f"temp-{session_id}" if temporary_mode else "permanent"
+
+# Cleanup registration
+if temporary_mode:
+    atexit.register(cleanup_session, namespace)
+```
 
 ### **🔄 Conversation History System**
 - **Persistent Memory**: Conversations saved across browser sessions
@@ -460,17 +641,19 @@ GEMINI_API_KEY=your_secure_api_key_here
 
 #### **1. API Key Errors**
 ```
-Error: Invalid API key or quota exceeded
+Error: Configuration Error: ❌ PINECONE_API_KEY is missing
+Error: (401) Reason: Unauthorized - Invalid API Key
 ```
 **Solutions:**
-- Verify your `GEMINI_API_KEY` in the `.env` file
-- Check your Google AI Studio quota and billing
-- Ensure the API key has proper permissions
-- Try regenerating a new API key
+- Verify your API keys in `.streamlit/secrets.toml`
+- Check your Pinecone Console for valid API keys
+- Ensure the API key hasn't been revoked or expired
+- Try generating a new API key from Pinecone Console
+- Verify the API key format (should start with `pcsk_`)
 
 #### **2. Import and Dependency Issues**
 ```
-ModuleNotFoundError: No module named 'langchain'
+ModuleNotFoundError: No module named 'pinecone'
 ```
 **Solutions:**
 ```bash
@@ -478,22 +661,37 @@ ModuleNotFoundError: No module named 'langchain'
 pip install -r requirements.txt
 
 # If issues persist, create a fresh virtual environment
-python -m venv fresh_env
-fresh_env\Scripts\activate  # Windows
+python -m venv .venv
+.venv\Scripts\activate  # Windows
 pip install -r requirements.txt
 ```
 
-#### **3. Vector Database Issues**
+#### **3. Pinecone Connection Issues**
 ```
-Error: Could not connect to ChromaDB
+Error: Failed to setup Pinecone
+Error: Index 'rag-assistant' not found
 ```
 **Solutions:**
-- Check if `chroma_db/` directory exists and is writable
-- Clear the database: `rm -rf chroma_db/` and restart
-- Verify sufficient disk space
-- Ensure proper file permissions
+- Verify your Pinecone index exists in the console
+- Check the index name matches `PINECONE_INDEX_NAME` setting
+- Ensure index has correct dimensions (384 for all-MiniLM-L6-v2)
+- Verify your Pinecone environment is correct (`gcp-starter` for free tier)
+- Check Pinecone service status
 
-#### **4. Memory and Performance Issues**
+#### **4. Configuration Issues**
+```
+Error: secrets.toml not found
+```
+**Solutions:**
+```bash
+# Copy the template
+cp .streamlit/secrets.toml.template .streamlit/secrets.toml
+
+# Edit with your actual API keys
+# Make sure the file is not committed to git
+```
+
+#### **5. Memory and Performance Issues**
 ```
 Warning: High memory usage detected
 ```
@@ -549,19 +747,57 @@ streamlit-chat>=0.1.1               # Enhanced chat components
 langchain>=0.1.0                     # LLM application framework
 langchain-google-genai>=1.0.0       # Google Gemini integration
 langchain-community>=0.0.20         # Community integrations
-langchain-chroma>=0.1.0             # ChromaDB integration
-langchain-huggingface>=0.0.3        # HuggingFace embeddings
+## 📈 Project Status & Roadmap
 
-# Vector Database and Embeddings
-chromadb>=0.4.18                     # Vector database
-sentence-transformers>=2.2.2        # Text embeddings
-huggingface-hub>=0.19.0             # HuggingFace model hub
+### **✅ Current Features (Fully Implemented)**
+- ✅ **Pinecone Cloud Integration** - Production-ready vector database
+- ✅ **Streamlit Secrets Management** - Secure configuration system
+- ✅ **Storage Mode Selection** - Temporary vs Permanent storage
+- ✅ **Enhanced Security** - Comprehensive protection patterns
+- ✅ **Session Management** - UUID-based namespace isolation
+- ✅ **Automatic Cleanup** - Exit handlers for temporary sessions
+- ✅ **API Key Validation** - Format and length checking
+- ✅ **Configuration Validation** - Error guidance and diagnostics
+- ✅ **Google Gemini 2.5 Pro** - Latest LLM integration
+- ✅ **Multi-format Processing** - PDF and web content support
+- ✅ **Conversation History** - Context-aware responses
+- ✅ **Feedback System** - Response quality improvement
+- ✅ **Streamlit Cloud Ready** - Cloud deployment support
 
-# Document Processing
-PyPDF2>=3.0.0                       # PDF text extraction
-beautifulsoup4>=4.12.0              # HTML parsing and web scraping
-requests>=2.31.0                    # HTTP requests for web scraping
-urllib3>=2.0.0                      # URL handling utilities
+### **🚀 Recent Enhancements**
+- **Migrated from ChromaDB to Pinecone** for cloud scalability
+- **Implemented secrets.toml configuration** for better security
+- **Added storage mode management** with automatic cleanup
+- **Enhanced gitignore patterns** for comprehensive protection
+- **Created security documentation** and best practices
+- **Improved configuration validation** with detailed error messages
+
+### **🔮 Future Roadmap**
+- 🔄 **Advanced Analytics** - Usage metrics and performance monitoring
+- 🔄 **Multi-language Support** - International language processing
+- 🔄 **Advanced Search** - Hybrid search with keyword + semantic
+- 🔄 **Document Management** - Edit, delete, and organize documents
+- 🔄 **User Authentication** - Multi-user support with permissions
+- 🔄 **API Integration** - RESTful API for external integrations
+
+### **💡 Contributing**
+We welcome contributions! Please see our contribution guidelines:
+1. Fork the repository
+2. Create a feature branch
+3. Follow security best practices
+4. Add comprehensive tests
+5. Update documentation
+6. Submit a pull request
+
+### **📞 Support & Contact**
+- **Repository**: [RAG-LLM-Assistant-with-Gemini_Pinecone](https://github.com/Shib-Sankar-Das/RAG-LLM-Assistant-with-Gemini_Pinecone)
+- **Issues**: GitHub Issues for bug reports and feature requests
+- **Documentation**: See markdown files in repository
+- **Security**: Follow [SECURITY_CHECKLIST.md](SECURITY_CHECKLIST.md) guidelines
+
+---
+*Project last updated: July 25, 2025*  
+*Version: 2.0 - Pinecone Cloud Edition with Enhanced Security*
 
 # Environment and Configuration
 python-dotenv>=1.0.0                # Environment variable management
