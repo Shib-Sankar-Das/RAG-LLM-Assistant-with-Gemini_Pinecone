@@ -32,19 +32,36 @@ ENV/
 env.bak/
 venv.bak/
 
-# Environment variables
+# Environment variables and secrets
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+*.env
 
-# ChromaDB (deprecated - keeping for safety)
+# Streamlit secrets and configuration
+.streamlit/secrets.toml
+.streamlit/secrets.*.toml
+.streamlit/config.toml
+
+# API Keys and sensitive files
+*api_key*
+*secret*
+*credentials*
+*.pem
+*.key
+*.crt
+
+# ChromaDB and vector databases (deprecated - keeping for safety)
 chroma_db/
 *.sqlite3
+*.db
+vector_store/
+faiss_index/
 
-# Streamlit
-.streamlit/secrets.toml
+# Pinecone local cache
+.pinecone/
 
 # Unit test / coverage reports
 htmlcov/
@@ -125,12 +142,30 @@ credentials/
 *.backup
 *.old
 
-# Data files (if large datasets)
+# Temporary files that might contain sensitive data
+temp/
+tmp/
+cache/
+.cache/
+*.tmp
+*.temp
+
+# Data files (if large datasets or contain sensitive info)
 data/
 datasets/
 *.csv
 *.xlsx
 *.parquet
+
+# Log files that might contain API keys
+logs/
+*.log
+*.out
+
+# Docker secrets (if using containers)
+docker-compose.override.yml
+.docker/
+secrets.yml
 
 # Node.js (if any frontend dependencies)
 node_modules/
